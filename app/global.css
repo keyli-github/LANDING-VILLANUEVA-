@@ -448,28 +448,17 @@ html:not([data-opening-playing]) .openingCard {
 }
 .sendSteps li[data-in-view="false"] > .sendStep {
   opacity: 0;
-  transform: translateY(30px) scale(0.96);
+  transform: translateY(8px);
 }
 .sendSteps li[data-in-view="true"] > .sendStep {
-  animation: send-step-entrance 0.86s cubic-bezier(0.22, 1, 0.36, 1)
-    calc(var(--step-index) * 145ms) both;
+  animation: send-step-entrance 0.62s ease-out calc(var(--step-index) * 145ms) both;
 }
 @keyframes send-step-entrance {
-  0% {
+  from {
     opacity: 0;
-    transform: translateY(30px) scale(0.96);
+    transform: translateY(8px);
   }
-  55% {
-    opacity: 1;
-    transform: translateY(-10px) scale(1.023);
-  }
-  76% {
-    transform: translateY(4px) scale(0.997);
-  }
-  90% {
-    transform: translateY(-2px);
-  }
-  100% {
+  to {
     opacity: 1;
     transform: none;
   }
