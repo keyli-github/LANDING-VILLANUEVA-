@@ -21,6 +21,6 @@ Publica el contenido de `out/` en un alojamiento estático. Los textos, testimon
 
 ## Datos de la agencia
 
-- En `exchangeRates`, escribe las tasas publicadas por la agencia en soles por dólar o euro y el momento de actualización en `updatedAt` con formato ISO y zona horaria. Los valores `null` muestran el enlace para consultar esa operación.
+- En `exchangeRates`, escribe las tasas de compra y venta presencial en soles por dólar y el momento de actualización en `updatedAt` con formato ISO y zona horaria. Los valores `null` muestran el enlace para consultar esa operación.
 - En `storefrontPhoto`, indica la ruta pública de una foto de la fachada, por ejemplo `/media/fachada.webp`. La miniatura aparece junto a **Cómo llegar**.
 - Los clics a WhatsApp generan el evento `whatsapp_click` en `window.dataLayer` con `origen`, `servicio` y `destino`. Los conteos de la pestaña se pueden revisar con `sessionStorage.getItem("villanueva.whatsappClicks")`. Para reunir clics de distintos visitantes, conecta ese evento a un recolector de analítica.

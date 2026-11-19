@@ -12,6 +12,7 @@ import {
   storefrontPhoto,
   mapEmbed,
   directionsLink,
+  dollarExchangeSubject,
   services,
   destinations,
   reviews,
@@ -20,6 +21,7 @@ import { ExchangeBoard, QuestionsPanel, SendQuote, SendSteps } from "./landing-e
 import { PrivacyPolicy, TermsAndConditions } from "./legal-documents";
 import { WhatsAppLink } from "./whatsapp-tracking";
 const asset = (name) => "/media/" + name + ".webp";
+const serviceImages = (idx) => services[idx][2]?.images ?? [`s${idx}a`, `s${idx}b`];
 const nav = [
   ["inicio", "Inicio"],
   ["servicios", "Servicios"],
@@ -216,11 +218,11 @@ const slides = [
   ],
   [
     "hero-cambio",
-    "Tus divisas,",
-    "a tu alcance.",
-    "Compra y vende dólares y euros con atención personalizada en nuestra agencia.",
+    "Cambia dólares",
+    "en Pataz.",
+    "Compra y vende dólares de manera presencial en nuestra agencia.",
     "Consultar cambio",
-    "cambio de divisas",
+    dollarExchangeSubject,
   ],
 ];
 const heroMorphDistance = 48;
@@ -349,7 +351,8 @@ function Stats({ motion }) {
 function Service({ idx, motion, select }) {
   const [ref, visible] = useVisible();
   const [picture, setPicture] = useState(0);
-  useAutoAdvance(visible && motion, 2250 + (idx % 4) * 180, setPicture, 2);
+  const images = serviceImages(idx);
+  useAutoAdvance(visible && motion, 2250 + (idx % 4) * 180, setPicture, images.length);
   return (
     <button
       ref={ref}
@@ -361,12 +364,12 @@ function Service({ idx, motion, select }) {
       <span className="servicePics" aria-hidden="true">
         {["serviceBlur", "serviceSharp"].map((layer) => (
           <span className={layer} key={layer}>
-            {["a", "b"].map((letter, i) => (
+            {images.map((image, i) => (
               <img
-                key={letter}
+                key={image}
                 className={i === picture ? "on" : ""}
                 loading="lazy"
-                src={asset("s" + idx + letter)}
+                src={asset(image)}
                 alt=""
               />
             ))}
@@ -410,9 +413,9 @@ function Modal({ children, close, titleId, className }) {
   );
 }
 function ServiceDetail({ idx, close }) {
-  const [name, description] = services[idx];
-  const picture = asset("s" + idx + "a");
-  const subject = name.toLowerCase();
+  const [name, description, options] = services[idx];
+  const picture = asset(serviceImages(idx)[0]);
+  const subject = options?.subject ?? name.toLowerCase();
   const [attachment, setAttachment] = useState(null);
   const [status, setStatus] = useState("");
 
@@ -768,8 +771,13 @@ function Footer() {
             </p>
           </div>
           <nav className="footServices" aria-label="Servicios">
-            {services.slice(0, 4).map(([name]) => (
-              <WhatsAppLink key={name} origin="pie" service={name} href={consult(name.toLowerCase())}>
+            {services.slice(0, 4).map(([name, , options]) => (
+              <WhatsAppLink
+                key={name}
+                origin="pie"
+                service={name}
+                href={consult(options?.subject ?? name.toLowerCase())}
+              >
                 {name}
               </WhatsAppLink>
             ))}

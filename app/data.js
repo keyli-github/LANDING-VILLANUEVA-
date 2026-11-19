@@ -8,6 +8,7 @@ export const phone = "+51 963 403 290";
 export const address = "Calle San Pedro S/N, Pataz, La Libertad, Perú";
 export const businessHours = "Lun. a dom. · 6:30 a. m. – 7:30 p. m.";
 export const shortBusinessHours = "Lun.–dom. 6:30–19:30";
+export const dollarExchangeSubject = "el cambio presencial de dólares en Pataz";
 // Use a local image of the actual storefront when it is available.
 export const storefrontPhoto = null;
 // Street-area viewport between the INEI locality and the municipal office.
@@ -30,8 +31,9 @@ export const services = [
     "Envía dinero a Chile, Ecuador, Colombia y Venezuela con tipos de cambio competitivos y entrega garantizada.",
   ],
   [
-    "Cambio de divisas",
-    "Compra y vende dólares, euros y otras divisas con tasas competitivas y sin comisiones ocultas.",
+    "Cambio de dólares",
+    "Compra y vende dólares de manera presencial en nuestra agencia de Pataz.",
+    { subject: dollarExchangeSubject, images: ["cambio-dolares", "s2b"] },
   ],
   [
     "Pago de servicios",
@@ -60,12 +62,11 @@ export const destinations = [
   ["Colombia", "Peso colombiano", "COP ($)", "co"],
   ["Venezuela", "Bolívar soberano", "VES (Bs.S)", "ve"],
 ];
-// Rates in soles per unit. Use an ISO timestamp with a timezone for updatedAt.
+// Rates in soles per U.S. dollar. Use an ISO timestamp with a timezone for updatedAt.
 // A null rate offers a WhatsApp consultation for that operation.
 export const exchangeRates = {
   updatedAt: null,
   USD: { compra: null, venta: null },
-  EUR: { compra: null, venta: null },
 };
 export const reviews = [
   [

@@ -126,25 +126,21 @@ const dateFormat = new Intl.DateTimeFormat("es-PE", {
   timeStyle: "short",
   timeZone: "America/Lima",
 });
-const currencies = [
-  ["USD", "Dólar estadounidense"],
-  ["EUR", "Euro"],
-];
 const operations = ["compra", "venta"];
 
 export function ExchangeBoard() {
   const updatedAt = Date.parse(exchangeRates.updatedAt);
   const hasDate = Number.isFinite(updatedAt);
-  const rate = (code, operation) => {
-    const value = exchangeRates[code][operation];
+  const rate = (operation) => {
+    const value = exchangeRates.USD[operation];
     return hasDate && Number.isFinite(value) && value > 0 ? value : null;
   };
-  const hasRates = currencies.some(([code]) => operations.some((operation) => rate(code, operation) !== null));
+  const hasRates = operations.some((operation) => rate(operation) !== null);
 
   return (
     <section className="ratesPanel" id="tipo-de-cambio" aria-labelledby="rates-title">
-      <h2 id="rates-title">Tipo de cambio</h2>
-      <p>Compra y venta en soles por unidad.</p>
+      <h2 id="rates-title">Cambio de dólares</h2>
+      <p>Compra y venta presencial en Pataz. Tasas en soles por dólar.</p>
       <table aria-labelledby="rates-title">
         <thead>
           <tr>
@@ -154,28 +150,26 @@ export function ExchangeBoard() {
           </tr>
         </thead>
         <tbody>
-          {currencies.map(([code, name]) => (
-            <tr key={code}>
-              <th scope="row"><strong>{code}</strong><small>{name}</small></th>
-              {operations.map((operation) => {
-                const value = rate(code, operation);
-                return (
-                  <td key={operation}>
-                    {value === null ? (
-                      <WhatsAppLink
-                        origin="tipo_de_cambio"
-                        service={operation + " " + code}
-                        href={consult(`el tipo de cambio para ${operation} de ${name.toLowerCase()} (${code})`)}
-                        aria-label={`Consultar ${operation} de ${name} por WhatsApp`}
-                      >
-                        Consultar <FiArrowUpRight aria-hidden="true" />
-                      </WhatsAppLink>
-                    ) : `S/ ${rateFormat.format(value)}`}
-                  </td>
-                );
-              })}
-            </tr>
-          ))}
+          <tr>
+            <th scope="row"><strong>USD</strong><small>Dólar estadounidense</small></th>
+            {operations.map((operation) => {
+              const value = rate(operation);
+              return (
+                <td key={operation}>
+                  {value === null ? (
+                    <WhatsAppLink
+                      origin="tipo_de_cambio"
+                      service={operation + " USD"}
+                      href={consult(`el tipo de cambio para la ${operation} presencial de dólares en Pataz`)}
+                      aria-label={`Consultar ${operation} presencial de dólares por WhatsApp`}
+                    >
+                      Consultar <FiArrowUpRight aria-hidden="true" />
+                    </WhatsAppLink>
+                  ) : `S/ ${rateFormat.format(value)}`}
+                </td>
+              );
+            })}
+          </tr>
         </tbody>
       </table>
       {hasRates ? (

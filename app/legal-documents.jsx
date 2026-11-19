@@ -50,7 +50,8 @@ export function PrivacyPolicy() {
         <p>Los datos recopilados se utilizan exclusivamente para:</p>
         <ul>
           <li>
-            Prestación de los servicios de transferencia, cambio de divisas y pagos
+            Prestación de los servicios de transferencia, cambio presencial de
+            dólares y pagos
           </li>
           <li>Cumplimiento de obligaciones legales y regulatorias (SBS, UIF)</li>
           <li>Comunicación con el cliente sobre el estado de sus operaciones</li>
@@ -135,7 +136,7 @@ export function TermsAndConditions() {
         <p>COMERCIAL INOVATEC presta servicios de:</p>
         <ul>
           <li>Envío de dinero nacional e internacional (remesas)</li>
-          <li>Cambio de divisas (USD, EUR y otras)</li>
+          <li>Cambio de dólares de manera presencial en la agencia</li>
           <li>Pagos de servicios (agua, luz, telefonía, etc.)</li>
           <li>Giros y depósitos a cuentas bancarias</li>
           <li>Pagos en efectivo en agencia</li>
