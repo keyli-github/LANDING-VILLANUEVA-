@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { SiWhatsapp } from "react-icons/si";
 import {
   consult,
@@ -8,10 +8,7 @@ import {
   phone,
   address,
   businessHours,
-  shortBusinessHours,
-  storefrontPhoto,
-  mapEmbed,
-  directionsLink,
+  branches,
   dollarExchangeSubject,
   services,
   destinations,
@@ -226,7 +223,7 @@ const slides = [
   ],
 ];
 const heroMorphDistance = 48;
-function Hero({ motion, cardRef, opening }) {
+function Hero({ motion, cardRef, opening, branchSelection, selectBranch }) {
   const [ref, visible] = useVisible();
   const [index, setIndex] = useState(0);
   const [focused, setFocused] = useState(false);
@@ -292,7 +289,13 @@ function Hero({ motion, cardRef, opening }) {
             {cta}
           </WhatsAppLink>
         </div>
-        <Location motion={motion} cardRef={cardRef} opening={opening} />
+        <Location
+          motion={motion}
+          cardRef={cardRef}
+          opening={opening}
+          branchSelection={branchSelection}
+          selectBranch={selectBranch}
+        />
       </div>
     </section>
   );
@@ -643,14 +646,15 @@ function MapOverview({ zoomed = false, onZoom }) {
     </div>
   );
 }
-function LocationMap({ motion, opening }) {
+function LocationMap({ branch, motion, opening }) {
   const [ref, visible] = useVisible(0.5);
   const [mapStatus, setMapStatus] = useState("idle");
   const [zoomed, setZoomed] = useState(false);
   useEffect(() => {
     if (visible) setMapStatus((status) => (status === "idle" ? "loading" : status));
   }, [visible]);
-  const showIntro = opening || mapStatus !== "ready" || (motion && !zoomed);
+  const useOverview = branch.id === "pataz";
+  const showIntro = opening || mapStatus !== "ready" || (useOverview && motion && !zoomed);
   return (
     <div
       className="locationMapFrame"
@@ -662,8 +666,10 @@ function LocationMap({ motion, opening }) {
       {mapStatus !== "idle" && (
         <iframe
           className="locationMap"
-          title="Calle San Pedro, Pataz, en Google Maps"
-          src={mapEmbed}
+          title={branch.mapArea
+            ? `Mapa de la localidad de ${branch.name} en Google Maps`
+            : `Sede de ${branch.name} en Google Maps`}
+          src={branch.map}
           referrerPolicy="no-referrer-when-downgrade"
           tabIndex={showIntro ? -1 : undefined}
           aria-hidden={showIntro || undefined}
@@ -671,18 +677,22 @@ function LocationMap({ motion, opening }) {
           allowFullScreen
         />
       )}
-      <MapOverview zoomed={zoomed} onZoom={() => setZoomed(true)} />
+      {useOverview ? (
+        <MapOverview zoomed={zoomed} onZoom={() => setZoomed(true)} />
+      ) : showIntro && (
+        <div className="locationMapLoading" aria-hidden="true"><Icon name="pin" /></div>
+      )}
     </div>
   );
 }
-function LocationInfo({ preview = false }) {
+function LocationInfo({ branch, preview = false }) {
   const mapLabel = (
     <>Cómo llegar <span aria-hidden="true">↗</span></>
   );
-  const photo = storefrontPhoto && (
+  const photo = branch.photo && (
     <img
       className="locationPhoto"
-      src={storefrontPhoto}
+      src={branch.photo}
       width="42"
       height="36"
       alt="Fachada de Inversiones Villanueva"
@@ -690,43 +700,99 @@ function LocationInfo({ preview = false }) {
   );
   return (
     <div className="locationInfo">
-      <h2 id={preview ? undefined : "location-title"}>Visítanos en Pataz</h2>
-      <p className="locationAddress">
-        <Icon name="pin" />
-        <span>{address}</span>
-      </p>
-      <p className="locationHours">
-        <Icon name="clock" />
-        <span className="locationHoursFull">{businessHours}</span>
-        <span className="locationHoursCompact">{shortBusinessHours}</span>
-      </p>
-      <div className="locationActions">
-        {preview ? (
-          <span className="locationLink">{mapLabel}</span>
-        ) : (
-          <a className="locationLink" href={directionsLink} target="_blank" rel="noopener">
-            {mapLabel}
-          </a>
-        )}
-        {photo && (preview ? photo : (
-          <a href={storefrontPhoto} target="_blank" rel="noopener" aria-label="Ver la fachada">
-            {photo}
-          </a>
-        ))}
-      </div>
+      <h2>
+        {branch.id === "pataz" && <span className="locationLead">Visítanos en </span>}
+        {branch.name}
+      </h2>
+      {branch.address && (
+        <p className="locationAddress">
+          <Icon name="pin" />
+          <span>{branch.address}</span>
+        </p>
+      )}
+      {branch.hours && (
+        <p className="locationHours">
+          <Icon name="clock" />
+          <span className="locationHoursFull">{branch.hours}</span>
+          <span className="locationHoursCompact">{branch.shortHours}</span>
+        </p>
+      )}
+      {branch.directions && (
+        <div className="locationActions">
+          {preview ? (
+            <span className="locationLink">{mapLabel}</span>
+          ) : (
+            <a className="locationLink" href={branch.directions} target="_blank" rel="noopener">
+              {mapLabel}
+            </a>
+          )}
+          {photo && (preview ? photo : (
+            <a href={branch.photo} target="_blank" rel="noopener" aria-label="Ver la fachada">
+              {photo}
+            </a>
+          ))}
+        </div>
+      )}
+      {branch.mapArea && <small className="locationMapNote">Mapa de la localidad</small>}
     </div>
   );
 }
-function Location({ motion, cardRef, opening }) {
+function LocationBranches({ selected, onSelect }) {
+  return (
+    <div className="locationBranches" role="group" aria-label="Sedes">
+      {branches.map((branch, index) => (
+        <button
+          type="button"
+          key={branch.id}
+          aria-pressed={index === selected}
+          onClick={onSelect ? () => onSelect(index) : undefined}
+        >
+          {branch.name}
+        </button>
+      ))}
+    </div>
+  );
+}
+function Location({ motion, cardRef, opening, branchSelection, selectBranch }) {
+  const [observerRef, visible] = useVisible(0.5);
+  const [automaticBranch, setAutomaticBranch] = useState(0);
+  const [hovered, setHovered] = useState(false);
+  const [focused, setFocused] = useState(false);
+  const setCard = useCallback((node) => {
+    observerRef.current = node;
+    cardRef.current = node;
+  }, [observerRef, cardRef]);
+  useAutoAdvance(
+    motion && visible && !opening && !hovered && !focused && branchSelection === null,
+    7600,
+    setAutomaticBranch,
+    branches.length,
+  );
+  const selected = branchSelection ?? automaticBranch;
+  const branch = branches[selected];
   return (
     <section
       className="locationPanel"
       id="ubicacion"
-      ref={cardRef}
-      aria-labelledby="location-title"
+      ref={setCard}
+      aria-label="Sedes de Inversiones Villanueva"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      onFocusCapture={() => setFocused(true)}
+      onBlurCapture={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) setFocused(false);
+      }}
     >
-      <LocationInfo />
-      <LocationMap motion={motion} opening={opening} />
+      <LocationBranches selected={selected} onSelect={selectBranch} />
+      <div
+        className="locationSlide"
+        key={branch.id}
+        data-animate={motion ? "" : undefined}
+        data-unmapped={branch.map ? undefined : ""}
+      >
+        <LocationInfo branch={branch} />
+        {branch.map && <LocationMap branch={branch} motion={motion} opening={opening} />}
+      </div>
     </section>
   );
 }
@@ -744,15 +810,18 @@ function LandingOpening() {
         />
       </div>
       <div className="locationPanel openingCard">
-        <LocationInfo preview />
-        <div className="locationMapFrame" data-intro="">
-          <MapOverview />
+        <LocationBranches selected={0} />
+        <div className="locationSlide">
+          <LocationInfo branch={branches[0]} preview />
+          <div className="locationMapFrame" data-intro="">
+            <MapOverview />
+          </div>
         </div>
       </div>
     </div>
   );
 }
-function Footer() {
+function Footer({ showPataz }) {
   const [legalDocument, setLegalDocument] = useState(null);
   return (
     <>
@@ -810,7 +879,7 @@ function Footer() {
             </button>
           </nav>
           <address className="footContact" aria-label="Contacto">
-            <a href="#ubicacion">
+            <a href="#ubicacion" onClick={showPataz}>
               <Icon name="pin" /> <span>{address}</span>
             </a>
             <p>
@@ -843,6 +912,7 @@ export default function Page() {
   const [opening, setOpening] = useState("splash");
   const openingActive = opening !== "done";
   const locationCard = useRef(null);
+  const [branchSelection, selectBranch] = useState(null);
   const [detail, select] = useState(null);
   const [quote, setQuote] = useState({ country: "", origin: "cotizador" });
   useEffect(() => {
@@ -866,7 +936,13 @@ export default function Page() {
       {openingActive && <LandingOpening />}
       <Nav />
       <main>
-        <Hero motion={motion && !openingActive} cardRef={locationCard} opening={openingActive} />
+        <Hero
+          motion={motion && !openingActive}
+          cardRef={locationCard}
+          opening={openingActive}
+          branchSelection={branchSelection}
+          selectBranch={selectBranch}
+        />
         <Stats motion={motion && opening !== "splash"} />
         <Reveal
           id="cotizar"
@@ -912,7 +988,7 @@ export default function Page() {
           </div>
         </Reveal>
       </main>
-      <Footer />
+      <Footer showPataz={() => selectBranch(0)} />
       <WhatsAppLink
         className="whatsapp"
         origin="flotante"

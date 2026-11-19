@@ -21,6 +21,40 @@ export const mapEmbed =
   mapCenter;
 export const directionsLink =
   "https://www.google.com/maps/dir/?api=1&destination=" + encodeURIComponent(address);
+
+const locationMap = (query) =>
+  "https://www.google.com/maps?hl=es&output=embed&t=h&z=17&q=" + encodeURIComponent(query);
+const tayabambaCoordinates = "-8.275803,-77.2952117";
+
+export const branches = [
+  {
+    id: "pataz",
+    name: "Pataz",
+    address,
+    hours: businessHours,
+    shortHours: shortBusinessHours,
+    photo: storefrontPhoto,
+    directions: directionsLink,
+    map: mapEmbed,
+  },
+  {
+    id: "llacuabamba",
+    name: "Llacuabamba",
+    address: "Llacuabamba, Parcoy, La Libertad",
+    directions: "https://maps.app.goo.gl/n3SBJq5pJAsfJCrp6?g_st=aw",
+    map: locationMap("Llacuabamba, Parcoy, La Libertad, Perú"),
+    mapArea: true,
+  },
+  {
+    id: "tayabamba",
+    name: "Tayabamba",
+    address: "Tayabamba, Pataz, La Libertad",
+    directions: "https://www.google.com/maps?q=" + tayabambaCoordinates + "&z=17&hl=es",
+    map: locationMap(tayabambaCoordinates),
+  },
+  { id: "chillia", name: "Chillia" },
+];
+
 export const services = [
   [
     "Envío nacional",

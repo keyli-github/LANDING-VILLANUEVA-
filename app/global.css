@@ -890,35 +890,89 @@ h2 {
   line-height: 1;
 }
 .locationPanel {
+  --location-slide-height: 166px;
   display: grid;
-  grid-template-columns: minmax(215px, 0.79fr) minmax(0, 1.21fr);
-  align-items: center;
-  gap: 14px;
+  gap: 6px;
   width: min(100%, 690px);
   padding: 9px;
   border: 1px solid #e0e9f1;
   border-radius: 23px;
+  overflow: clip;
   background: #fff;
   box-shadow: 0 15px 36px #071e3f29, 0 3px 9px #071e3f0d;
   color: var(--navy);
+}
+.locationBranches {
+  display: flex;
+  gap: 4px;
+  min-width: 0;
+  overflow-x: auto;
+  padding: 3px;
+  border-radius: 13px;
+  background: #f1f5f9;
+  scrollbar-width: none;
+}
+.locationBranches button {
+  flex: 1 0 auto;
+  padding: 5px 9px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: #314961;
+  font-size: 0.82rem;
+  font-weight: 700;
+  line-height: 1.25;
+  white-space: nowrap;
+  transition: background-color 0.22s ease, color 0.22s ease;
+}
+.locationBranches button:hover {
+  background: #e4ecf4;
+}
+.locationBranches button[aria-pressed="true"] {
+  background: #fff0e1;
+  color: #8b3d09;
+}
+.locationBranches button:focus-visible {
+  outline-offset: -2px;
+}
+.locationSlide {
+  display: grid;
+  grid-template-columns: minmax(215px, 0.79fr) minmax(0, 1.21fr);
+  align-items: center;
+  gap: 14px;
+  min-height: var(--location-slide-height);
+}
+.locationSlide[data-animate] {
+  animation: location-slide-in 0.48s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.locationSlide[data-unmapped] {
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: center;
+  border-radius: 15px;
+  background: #f1f5f9;
+}
+.locationSlide[data-unmapped] .locationInfo {
+  padding: 0;
 }
 html[data-opening-playing] #ubicacion {
   opacity: 0;
   pointer-events: none;
 }
 .locationInfo {
-  padding: 12px 3px 12px clamp(10px, 1.75vw, 24px);
+  padding: 8px 3px 8px clamp(10px, 1.75vw, 24px);
 }
 .locationInfo h2 {
   font-size: clamp(1.46rem, 2vw, 1.75rem);
+  line-height: 1.15;
 }
 .locationAddress {
   display: flex;
   align-items: flex-start;
   gap: 7px;
-  margin: 11px 0 8px;
+  margin: 8px 0 6px;
   color: #42556e;
   font-size: 0.89rem;
+  line-height: 1.35;
 }
 .locationAddress .icon {
   width: 17px;
@@ -930,9 +984,10 @@ html[data-opening-playing] #ubicacion {
   display: flex;
   align-items: center;
   gap: 7px;
-  margin-bottom: 13px;
+  margin-bottom: 9px;
   color: #42556e;
   font-size: 0.8rem;
+  line-height: 1.35;
 }
 .locationHours .icon {
   width: 16px;
@@ -948,6 +1003,13 @@ html[data-opening-playing] #ubicacion {
   align-items: center;
   gap: 6px;
 }
+.locationMapNote {
+  display: block;
+  margin-top: 6px;
+  color: #42556e;
+  font-size: 0.72rem;
+  line-height: 1.25;
+}
 .locationPhoto {
   display: block;
   border-radius: 8px;
@@ -956,7 +1018,7 @@ html[data-opening-playing] #ubicacion {
 .locationMapFrame {
   position: relative;
   width: 100%;
-  height: 204px;
+  height: var(--location-slide-height);
   container-type: size;
   overflow: hidden;
   border: 1px solid #d7e5ef;
@@ -970,20 +1032,40 @@ html[data-opening-playing] #ubicacion {
   border: 0;
   background: #dcebf3;
 }
+.locationMapLoading {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: #dcebf3;
+  color: #557b9b;
+  pointer-events: none;
+}
 .locationLink {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  padding: 8px 12px;
+  padding: 6px 11px;
   border-radius: 999px;
   background: #fff0e1;
   color: #8b3d09;
   font-size: 0.85rem;
   font-weight: 750;
+  line-height: 1.35;
   transition: background-color 0.2s;
 }
 .locationLink:hover {
   background: #ffe0c4;
+}
+@keyframes location-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 .mapIntro {
   position: absolute;
@@ -1613,21 +1695,36 @@ dialog p {
     --location-overlap: 91px;
   }
   .locationPanel {
-    grid-template-columns: minmax(0, 1fr) minmax(202px, 1.65fr);
+    --location-slide-height: 137px;
     width: min(100%, 344px);
-    gap: 8px;
+    gap: 5px;
     padding: 7px;
     border-radius: 18px;
+  }
+  .locationBranches {
+    gap: 3px;
+    padding: 2px;
+  }
+  .locationBranches button {
+    padding: 4px 5px;
+    font-size: 0.72rem;
+  }
+  .locationSlide {
+    grid-template-columns: minmax(0, 1fr) minmax(202px, 1.65fr);
+    gap: 8px;
   }
   .locationInfo {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: 6px;
+    gap: 4px;
     padding: 3px 1px 3px 4px;
   }
   .locationInfo h2 {
     font-size: clamp(1rem, 4.3vw, 1.27rem);
+  }
+  .locationLead {
+    display: none;
   }
   .locationAddress {
     margin: 0;
@@ -1656,8 +1753,10 @@ dialog p {
     line-height: 1.3;
   }
   .locationMapFrame {
-    height: 166px;
     border-radius: 12px;
+  }
+  .locationMapNote {
+    margin: 0;
   }
   .locationMap {
     /* Keep the iframe viewport larger than the compact preview. */
@@ -1770,11 +1869,18 @@ dialog p {
     display: none;
   }
   .locationPanel {
-    grid-template-columns: minmax(0, 1fr) minmax(174px, 1.65fr);
+    gap: 4px;
     padding: 6px;
+  }
+  .locationBranches button {
+    padding-block: 3px;
+  }
+  .locationSlide {
+    grid-template-columns: minmax(0, 1fr) minmax(174px, 1.65fr);
     gap: 7px;
   }
   .locationInfo {
+    gap: 3px;
     padding-left: 2px;
   }
   .locationLink {
@@ -1783,7 +1889,7 @@ dialog p {
   }
 }
 @media (max-width: 310px) {
-  .locationPanel {
+  .locationSlide {
     grid-template-columns: minmax(0, 1fr);
   }
 }
