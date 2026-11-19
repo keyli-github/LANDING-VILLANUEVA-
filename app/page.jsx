@@ -543,7 +543,7 @@ function Testimonials({ motion }) {
     </section>
   );
 }
-function MapOverview({ zoomed = false, onZoom }) {
+function MapOverview({ zoomed = false, onZoom, showPoint = true }) {
   return (
     <div className="mapIntro" aria-hidden="true">
       <div className="mapCamera" onAnimationEnd={onZoom}>
@@ -554,7 +554,7 @@ function MapOverview({ zoomed = false, onZoom }) {
           height="480"
           decoding="async"
         />
-        <span className="mapIntroPoint" />
+        {showPoint && <span className="mapIntroPoint" />}
       </div>
       <span className="mapIntroLabel">{zoomed ? "Pataz" : "Perú"}</span>
     </div>
@@ -651,15 +651,15 @@ function LocationInfo({ branch, preview = false }) {
     </div>
   );
 }
-function LocationBranches({ selected, onSelect }) {
+function LocationBranches({ selectedId, onSelect }) {
   return (
     <div className="locationBranches" role="group" aria-label="Sedes">
-      {branches.map((branch, index) => (
+      {branches.map((branch) => (
         <button
           type="button"
           key={branch.id}
-          aria-pressed={index === selected}
-          onClick={onSelect ? () => onSelect(index) : undefined}
+          aria-pressed={branch.id === selectedId}
+          onClick={onSelect ? () => onSelect(branch.id) : undefined}
         >
           {branch.name}
         </button>
@@ -672,18 +672,18 @@ function Location({ motion, cardRef, opening, branchSelection, selectBranch }) {
   const [automaticBranch, setAutomaticBranch] = useState(0);
   const [hovered, setHovered] = useState(false);
   const [focused, setFocused] = useState(false);
+  const chosenBranch = branches.find((branch) => branch.id === branchSelection);
   const setCard = useCallback((node) => {
     observerRef.current = node;
     cardRef.current = node;
   }, [observerRef, cardRef]);
   useAutoAdvance(
-    motion && visible && !opening && !hovered && !focused && branchSelection === null,
+    motion && visible && !opening && !hovered && !focused && !chosenBranch,
     7600,
     setAutomaticBranch,
     branches.length,
   );
-  const selected = branchSelection ?? automaticBranch;
-  const branch = branches[selected];
+  const branch = chosenBranch ?? branches[automaticBranch];
   return (
     <section
       className="locationPanel"
@@ -697,7 +697,7 @@ function Location({ motion, cardRef, opening, branchSelection, selectBranch }) {
         if (!event.currentTarget.contains(event.relatedTarget)) setFocused(false);
       }}
     >
-      <LocationBranches selected={selected} onSelect={selectBranch} />
+      <LocationBranches selectedId={branch.id} onSelect={selectBranch} />
       <div
         className="locationSlide"
         key={branch.id}
@@ -711,6 +711,7 @@ function Location({ motion, cardRef, opening, branchSelection, selectBranch }) {
   );
 }
 function LandingOpening() {
+  const firstBranch = branches[0];
   return (
     <div className="landingOpening" aria-hidden="true" inert>
       <div className="openingVeil" />
@@ -724,11 +725,11 @@ function LandingOpening() {
         />
       </div>
       <div className="locationPanel openingCard">
-        <LocationBranches selected={0} />
+        <LocationBranches selectedId={firstBranch.id} />
         <div className="locationSlide">
-          <LocationInfo branch={branches[0]} preview />
+          <LocationInfo branch={firstBranch} preview />
           <div className="locationMapFrame" data-intro="">
-            <MapOverview />
+            <MapOverview showPoint={firstBranch.id === "pataz"} />
           </div>
         </div>
       </div>
@@ -903,7 +904,7 @@ export default function Page({ initialService = null }) {
           </div>
         </Reveal>
       </main>
-      <Footer showPataz={() => selectBranch(0)} />
+      <Footer showPataz={() => selectBranch("pataz")} />
       <WhatsAppLink
         className="whatsapp"
         origin="flotante"

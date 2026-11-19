@@ -1875,8 +1875,14 @@ dialog p {
     gap: 4px;
     padding: 6px;
   }
+  .locationBranches {
+    flex-wrap: wrap;
+    gap: 2px;
+  }
   .locationBranches button {
     padding-block: 3px;
+    padding-inline: 2px;
+    font-size: 0.7rem;
   }
   .locationSlide {
     grid-template-columns: minmax(0, 1fr) minmax(174px, 1.65fr);
@@ -1897,6 +1903,12 @@ dialog p {
   }
   .locationSlide {
     grid-template-columns: minmax(0, 1fr);
+  }
+  .locationBranches {
+    justify-content: center;
+  }
+  .locationBranches button {
+    flex: 0 0 auto;
   }
   .locationInfo {
     align-items: center;

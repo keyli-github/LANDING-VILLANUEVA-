@@ -27,11 +27,29 @@ export const directionsLink =
 
 const locationMap = (query) =>
   "https://www.google.com/maps?hl=es&output=embed&t=h&z=17&q=" + encodeURIComponent(query);
+const localityLink = (query) =>
+  "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(query);
 const llacuabambaCoordinates = "-8.034366,-77.45514179999999";
 const tayabambaCoordinates = "-8.275803,-77.2952117";
 const chilliaLocality = "Chillia, Pataz, La Libertad, Perú";
+const retamasLocality = "Retamas, Parcoy, Pataz, La Libertad, Perú";
 
 export const branches = [
+  {
+    id: "llacuabamba",
+    name: "Llacuabamba",
+    address: "Llacuabamba, Parcoy, La Libertad",
+    directions: "https://www.google.com/maps/dir/?api=1&destination=" + encodeURIComponent(llacuabambaCoordinates),
+    map: locationMap(llacuabambaCoordinates),
+  },
+  {
+    id: "chillia",
+    name: "Chillia",
+    address: "Chillia, Pataz, La Libertad",
+    directions: localityLink(chilliaLocality),
+    map: locationMap(chilliaLocality),
+    mapArea: true,
+  },
   {
     id: "pataz",
     name: "Pataz",
@@ -43,13 +61,6 @@ export const branches = [
     map: mapEmbed,
   },
   {
-    id: "llacuabamba",
-    name: "Llacuabamba",
-    address: "Llacuabamba, Parcoy, La Libertad",
-    directions: "https://www.google.com/maps/dir/?api=1&destination=" + encodeURIComponent(llacuabambaCoordinates),
-    map: locationMap(llacuabambaCoordinates),
-  },
-  {
     id: "tayabamba",
     name: "Tayabamba",
     address: "Tayabamba, Pataz, La Libertad",
@@ -57,11 +68,11 @@ export const branches = [
     map: locationMap(tayabambaCoordinates),
   },
   {
-    id: "chillia",
-    name: "Chillia",
-    address: "Chillia, Pataz, La Libertad",
-    directions: "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(chilliaLocality),
-    map: locationMap(chilliaLocality),
+    id: "retamas",
+    name: "Retamas",
+    address: "Retamas, Parcoy, La Libertad",
+    directions: localityLink(retamasLocality),
+    map: locationMap(retamasLocality),
     mapArea: true,
   },
 ];
