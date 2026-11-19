@@ -3,7 +3,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { SiWhatsapp } from "react-icons/si";
 import {
   consult,
-  consultMessage,
+  consultService,
   mail,
   phone,
   address,
@@ -11,14 +11,15 @@ import {
   branches,
   dollarExchangeSubject,
   services,
+  serviceImages,
   destinations,
   reviews,
 } from "./data";
 import { ExchangeBoard, QuestionsPanel, SendQuote, SendSteps } from "./landing-extras";
 import { PrivacyPolicy, TermsAndConditions } from "./legal-documents";
 import { WhatsAppLink } from "./whatsapp-tracking";
+import { useVisible } from "./use-visible";
 const asset = (name) => "/media/" + name + ".webp";
-const serviceImages = (idx) => services[idx][2]?.images ?? [`s${idx}a`, `s${idx}b`];
 const nav = [
   ["inicio", "Inicio"],
   ["servicios", "Servicios"],
@@ -56,23 +57,6 @@ function useMotion() {
     };
   }, []);
   return enabled;
-}
-function useVisible(threshold = 0.08) {
-  const ref = useRef(null);
-  const [visible, setVisible] = useState(null);
-  useEffect(() => {
-    if (typeof IntersectionObserver !== "function") {
-      setVisible(true);
-      return;
-    }
-    const observer = new IntersectionObserver(
-      ([entry]) => setVisible(entry.intersectionRatio >= threshold),
-      { threshold },
-    );
-    observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, [threshold]);
-  return [ref, visible];
 }
 function useAutoAdvance(active, delay, setIndex, length) {
   useEffect(() => {
@@ -362,7 +346,7 @@ function Service({ idx, motion, select }) {
       className="service"
       data-in-view={visible}
       onClick={() => select(idx)}
-      aria-label={"Detalles de " + services[idx][0]}
+      aria-label={"Detalles de " + services[idx].name}
     >
       <span className="servicePics" aria-hidden="true">
         {["serviceBlur", "serviceSharp"].map((layer) => (
@@ -380,7 +364,7 @@ function Service({ idx, motion, select }) {
         ))}
       </span>
       <span className="serviceCaption">
-        <strong>{services[idx][0]}</strong>
+        <strong>{services[idx].name}</strong>
         <span className="more" aria-hidden="true">
           <b />⊕
         </span>
@@ -416,96 +400,26 @@ function Modal({ children, close, titleId, className }) {
   );
 }
 function ServiceDetail({ idx, close }) {
-  const [name, description, options] = services[idx];
+  const service = services[idx];
+  const { name, description } = service;
   const picture = asset(serviceImages(idx)[0]);
-  const subject = options?.subject ?? name.toLowerCase();
-  const [attachment, setAttachment] = useState(null);
-  const [status, setStatus] = useState("");
-
-  const prepareImage = ({ currentTarget: preview }) => {
-    const canShare =
-      typeof navigator.share === "function" && typeof navigator.canShare === "function";
-    const canCopy =
-      typeof ClipboardItem === "function" && typeof navigator.clipboard?.write === "function";
-    if (!canShare && !canCopy) return;
-
-    const canvas = document.createElement("canvas");
-    canvas.width = preview.naturalWidth;
-    canvas.height = preview.naturalHeight;
-    const context = canvas.getContext("2d");
-    if (!context) return;
-    context.drawImage(preview, 0, 0);
-    canvas.toBlob((blob) => {
-      if (!blob) return;
-      const file = new File([blob], name + ".png", { type: blob.type });
-      setAttachment({
-        file,
-        share: canShare && navigator.canShare({ files: [file] }),
-        copy: canCopy,
-      });
-    }, "image/png");
-  };
-
-  const shareImage = async () => {
-    try {
-      await navigator.share({
-        files: [attachment.file],
-        text: consultMessage(subject),
-      });
-    } catch (error) {
-      if (error.name === "AbortError") return;
-      setAttachment((current) => ({ ...current, share: false }));
-      setStatus("Puedes abrir el chat y adjuntar la imagen desde esta ficha.");
-    }
-  };
-
-  const copyImage = async () => {
-    try {
-      await navigator.clipboard.write([
-        new ClipboardItem({ "image/png": attachment.file }),
-      ]);
-      setStatus("Imagen copiada. Pégala en el chat de WhatsApp.");
-    } catch {
-      setAttachment((current) => ({ ...current, copy: false }));
-      setStatus("Descarga la imagen para adjuntarla en WhatsApp.");
-    }
-  };
 
   return (
     <Modal className="serviceDialog" close={close} titleId="service-detail-title">
-      <img src={picture} alt={name} onLoad={prepareImage} />
+      <img src={picture} alt={name} />
       <div>
         <h2 id="service-detail-title">{name}</h2>
         <p>{description}</p>
-        <div className="serviceActions">
-          {attachment?.share && (
-            <button type="button" className="cta" onClick={shareImage}>
-              Compartir imagen y mensaje
-            </button>
-          )}
-          <WhatsAppLink
-            className={attachment?.share ? "serviceAction" : "cta"}
-            origin="servicios"
-            service={name}
-            href={consult(subject)}
-            target="_blank"
-            rel="noopener"
-          >
-            <Icon name="wa" /> Consultar por WhatsApp
-          </WhatsAppLink>
-          {!attachment?.share && (
-            attachment?.copy ? (
-              <button type="button" className="serviceAction" onClick={copyImage}>
-                Copiar imagen
-              </button>
-            ) : (
-              <a className="serviceAction" href={picture} download={name + ".webp"}>
-                Descargar imagen
-              </a>
-            )
-          )}
-        </div>
-        <span className="serviceStatus" role="status">{status}</span>
+        <WhatsAppLink
+          className="cta"
+          origin="servicios"
+          service={name}
+          href={consultService(service)}
+          target="_blank"
+          rel="noopener"
+        >
+          <Icon name="wa" /> Consultar por WhatsApp
+        </WhatsAppLink>
       </div>
     </Modal>
   );
@@ -687,7 +601,7 @@ function LocationMap({ branch, motion, opening }) {
 }
 function LocationInfo({ branch, preview = false }) {
   const mapLabel = (
-    <>Cómo llegar <span aria-hidden="true">↗</span></>
+    <>{branch.mapArea ? "Ver localidad" : "Cómo llegar"} <span aria-hidden="true">↗</span></>
   );
   const photo = branch.photo && (
     <img
@@ -840,14 +754,14 @@ function Footer({ showPataz }) {
             </p>
           </div>
           <nav className="footServices" aria-label="Servicios">
-            {services.slice(0, 4).map(([name, , options]) => (
+            {services.slice(0, 4).map((service) => (
               <WhatsAppLink
-                key={name}
+                key={service.slug}
                 origin="pie"
-                service={name}
-                href={consult(options?.subject ?? name.toLowerCase())}
+                service={service.name}
+                href={consultService(service)}
               >
-                {name}
+                {service.name}
               </WhatsAppLink>
             ))}
           </nav>
@@ -907,15 +821,16 @@ function Footer({ showPataz }) {
     </>
   );
 }
-export default function Page() {
+export default function Page({ initialService = null }) {
   const motion = useMotion();
-  const [opening, setOpening] = useState("splash");
+  const [opening, setOpening] = useState(initialService === null ? "splash" : "done");
   const openingActive = opening !== "done";
   const locationCard = useRef(null);
   const [branchSelection, selectBranch] = useState(null);
-  const [detail, select] = useState(null);
+  const [detail, select] = useState(initialService);
   const [quote, setQuote] = useState({ country: "", origin: "cotizador" });
   useEffect(() => {
+    if (initialService !== null) return;
     const root = document.documentElement;
     const sync = () => {
       if (root.dataset.openingPhase) setOpening(root.dataset.openingPhase);
@@ -930,7 +845,7 @@ export default function Page() {
       clearTimeout(timeout);
       document.removeEventListener("villanueva:opening", sync);
     };
-  }, []);
+  }, [initialService]);
   return (
     <>
       {openingActive && <LandingOpening />}
@@ -961,8 +876,8 @@ export default function Page() {
             <span />
           </Reveal>
           <div className="grid">
-            {services.map(([name], idx) => (
-              <Service key={name} idx={idx} motion={motion} select={select} />
+            {services.map(({ slug }, idx) => (
+              <Service key={slug} idx={idx} motion={motion} select={select} />
             ))}
           </div>
         </section>

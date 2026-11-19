@@ -426,18 +426,45 @@ html:not([data-opening-playing]) .openingCard {
   padding: 0;
   list-style: none;
 }
-.sendSteps li {
+.sendStep {
   display: flex;
   align-items: flex-start;
   gap: 12px;
+  height: 100%;
   padding: clamp(14px, 1.9vw, 22px);
   border: 1px solid #27679d;
   border-radius: 16px;
   background: linear-gradient(140deg, #226eac, #16467a);
   color: white;
+  transition: opacity 0.32s ease, transform 0.45s ease;
 }
-.reveal[data-in-view="true"] .sendSteps li {
-  animation: appear 0.55s ease-out calc(var(--step-index) * 105ms) both;
+.sendSteps li[data-in-view="false"] > .sendStep {
+  opacity: 0;
+  transform: translateY(30px) scale(0.96);
+}
+.sendSteps li[data-in-view="true"] > .sendStep {
+  animation: send-step-entrance 0.86s cubic-bezier(0.22, 1, 0.36, 1)
+    calc(var(--step-index) * 145ms) both;
+}
+@keyframes send-step-entrance {
+  0% {
+    opacity: 0;
+    transform: translateY(30px) scale(0.96);
+  }
+  55% {
+    opacity: 1;
+    transform: translateY(-10px) scale(1.023);
+  }
+  76% {
+    transform: translateY(4px) scale(0.997);
+  }
+  90% {
+    transform: translateY(-2px);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
 }
 .stepNumber {
   display: grid;
@@ -1337,14 +1364,7 @@ dialog p {
 .serviceDialog > div {
   padding: clamp(17px, 4.5vw, 27px);
 }
-.serviceActions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-}
-.serviceActions .cta,
-.serviceAction {
+.serviceDialog .cta {
   display: inline-flex;
   align-items: center;
   gap: 7px;
@@ -1356,24 +1376,9 @@ dialog p {
   font-weight: 700;
   transition: background-color 0.2s ease;
 }
-.serviceAction {
-  background: #f0f4f8;
-  color: var(--navy);
-}
-.serviceAction:hover {
-  background: #e3eaf2;
-}
-.serviceActions .icon {
+.serviceDialog .cta .icon {
   width: 19px;
   height: 19px;
-}
-.serviceStatus {
-  display: block;
-  color: #42556e;
-  font-size: 0.83rem;
-}
-.serviceStatus:not(:empty) {
-  margin-top: 11px;
 }
 .dismiss {
   position: absolute;
@@ -1959,7 +1964,8 @@ dialog p {
     animation: none !important;
     transition: none !important;
   }
-  .reveal[data-in-view="false"]:not(:focus-within) > .revealContent {
+  .reveal[data-in-view="false"]:not(:focus-within) > .revealContent,
+  .sendSteps li[data-in-view="false"] > .sendStep {
     opacity: 1;
     transform: none;
   }

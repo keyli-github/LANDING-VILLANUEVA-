@@ -19,6 +19,8 @@ npm run build
 
 Publica el contenido de `out/` en un alojamiento estático. Los textos, testimonios y el número de WhatsApp se editan en `app/data.js`. Las fotografías WebP y los iconos están en `public/media/`. Los contadores de la franja empiezan a animarse al cargar la página.
 
+Al conectar el dominio definitivo, configura `NEXT_PUBLIC_SITE_URL` antes de compilar para que los enlaces de WhatsApp y las vistas previas apunten a ese dominio. Las imágenes para compartir están en `public/vistas-previas/`.
+
 ## Datos de la agencia
 
 - En `exchangeRates`, escribe las tasas de compra y venta presencial en soles por dólar y el momento de actualización en `updatedAt` con formato ISO y zona horaria. Los valores `null` muestran el enlace para consultar esa operación.

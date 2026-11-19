@@ -2,6 +2,7 @@ import { FiArrowUpRight } from "react-icons/fi";
 import { SiWhatsapp } from "react-icons/si";
 import { consult, destinations, exchangeRates, whatsapp } from "./data";
 import { trackWhatsApp, WhatsAppLink } from "./whatsapp-tracking";
+import { useVisible } from "./use-visible";
 
 const amountFormat = new Intl.NumberFormat("es-PE", { maximumFractionDigits: 2 });
 
@@ -91,19 +92,28 @@ const sendSteps = [
   ["Consulta la entrega", "Escríbenos por WhatsApp para conocer el estado del envío o confirmar la entrega."],
 ];
 
+function SendStep({ title, description, index }) {
+  const [ref, visible] = useVisible(0.42);
+  return (
+    <li ref={ref} data-in-view={visible} style={{ "--step-index": index }}>
+      <div className="sendStep">
+        <span className="stepNumber" aria-hidden="true">{index + 1}</span>
+        <div>
+          <h3>{title}</h3>
+          <p>{description}</p>
+        </div>
+      </div>
+    </li>
+  );
+}
+
 export function SendSteps() {
   return (
     <>
       <h2>Cómo hacer un envío</h2>
       <ol className="sendSteps">
         {sendSteps.map(([title, description], index) => (
-          <li key={title} style={{ "--step-index": index }}>
-            <span className="stepNumber" aria-hidden="true">{index + 1}</span>
-            <div>
-              <h3>{title}</h3>
-              <p>{description}</p>
-            </div>
-          </li>
+          <SendStep key={title} title={title} description={description} index={index} />
         ))}
       </ol>
     </>
